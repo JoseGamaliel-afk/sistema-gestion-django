@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Perfil - Sistema de Gestión{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Mi Perfil</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-1">Administra tu información personal</p>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden mb-6">
+        <div class="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-8">
+            <div class="flex items-center space-x-4">
+                <img src="{{ usuario.avatar_url }}" 
+                     alt="{{ usuario.nombre }}" 
+                     class="w-20 h-20 rounded-full object-cover border-4 border-white/30">
+                <div class="text-white">
+                    <h2 class="text-xl font-bold">{{ usuario.nombre }}</h2>
+                    <p class="text-primary-100">{{ usuario.perfil.nombre }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-6 grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Correo</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ usuario.correo }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Celular</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ usuario.celular|default:"-" }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Fecha de Registro</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ usuario.fecha_creacion|date:"d/m/Y" }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Último Acceso</p>
+                <p class="font-medium text-gray-900 dark:text-white">
+                    {{ usuario.ultimo_acceso|date:"d/m/Y H:i"|default:"Nunca" }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+            <i class="fas fa-edit mr-2 text-primary-500"></i>
+            Editar Información
+        </h3>
+        
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="p-4 bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 rounded-lg">
+                <p class="text-red-600 dark:text-red-400 text-sm">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    Por favor corrija los errores del formulario.
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Nombre -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                    Nombre completo
+                </label>
+                {{ form.nombre }}
+            </div>
+
+            <!-- Correo -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                    Correo electrónico
+                </label>
+                {{ form.correo }}
+            </div>
+
+            <!-- Avatar -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                    Imagen de perfil
+                </label>
+                <div class="flex items-center space-x-4">
+                    <img id="avatar-preview" 
+                         src="{{ usuario.avatar_url }}" 
+                         alt="{{ usuario.nombre }}" 
+                         class="w-16 h-16 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600">
+                    <input type="file" 
+                           name="avatar" 
+                           id="avatar-input"
+                           accept="image/*"
+                           class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="flex justify-end">
+                <button type="submit" 
+                        class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+                    <i class="fas fa-save mr-2"></i>
+                    Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('avatar-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('avatar-preview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}

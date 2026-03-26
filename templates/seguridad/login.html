@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema de Gestión</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="h-full bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900">
+    <div class="min-h-full flex items-center justify-center p-4">
+        <div class="w-full max-w-md">
+
+            <!-- Card -->
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+
+                <!-- Header -->
+                <div class="bg-primary-600 px-8 py-10 text-center">
+                    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-cogs text-primary-600 text-3xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-white">Sistema de Gestión</h1>
+                    <p class="text-primary-200 mt-2">Ingresa tus credenciales</p>
+                </div>
+
+                <!-- Form -->
+                <form id="login-form" class="px-8 py-8">
+                    {% csrf_token %}
+
+                    <!-- Error -->
+                    <div id="error-message" class="hidden mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-red-600 text-sm flex items-center">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            <span id="error-text"></span>
+                        </p>
+                    </div>
+
+                    <!-- Email no verificado -->
+                    <div id="verificacion-message" class="hidden mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p class="text-yellow-700 text-sm flex items-start">
+                            <i class="fas fa-exclamation-triangle mr-2 mt-0.5"></i>
+                            <span>
+                                Tu correo no ha sido verificado.
+                                <a href="{% url 'seguridad:reenviar_verificacion' %}" 
+                                   class="underline font-medium hover:text-yellow-800">
+                                    Reenviar verificación
+                                </a>
+                            </span>
+                        </p>
+                    </div>
+
+                    <!-- Correo -->
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-medium mb-2">
+                            <i class="fas fa-envelope mr-2 text-gray-400"></i>
+                            Correo electrónico
+                        </label>
+                        <input type="email" id="correo" name="correo"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                               placeholder="correo@ejemplo.com" required>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-medium mb-2">
+                            <i class="fas fa-lock mr-2 text-gray-400"></i>
+                            Contraseña
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="password" name="password"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                   placeholder="••••••••" required>
+                            <button type="button" id="toggle-password"
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- reCAPTCHA -->
+                    <div class="mb-6 flex justify-center">
+                        <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" id="submit-btn"
+                        class="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-lg flex items-center justify-center transition-colors">
+                        <span id="btn-text">Iniciar sesión</span>
+                        <i id="btn-loader" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                    </button>
+                </form>
+
+                <!-- Link recuperar contraseña (FUERA del form) -->
+                <div class="px-8 pb-6 text-right">
+                    <a href="{% url 'seguridad:recuperar_password' %}" 
+                       class="text-sm text-primary-600 hover:text-primary-700">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
+
+            </div>
+
+            <p class="text-center text-primary-200 text-sm mt-6">
+                © 2024 Sistema de Gestión. Todos los derechos reservados.
+            </p>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{% static 'js/login.js' %}"></script>
+</body>
+</html>
+

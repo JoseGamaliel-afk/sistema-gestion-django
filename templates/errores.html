@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviso - Sistema de Gestión</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="h-full bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
+    
+    <div class="max-w-lg w-full text-center bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+        <!-- Ícono Genérico -->
+        <div class="mb-6 flex justify-center">
+            <div class="w-24 h-24 bg-primary-50 dark:bg-gray-700 rounded-full flex items-center justify-center relative">
+                <i class="fas fa-tools text-5xl text-primary-500 opacity-80"></i>
+                <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center">
+                    <i class="fas fa-exclamation-circle text-xl text-amber-500"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Título Amigable -->
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+            Sección no disponible
+        </h2>
+
+        <!-- Mensaje Suave y Genérico -->
+        <p class="text-gray-600 dark:text-gray-400 mb-8 text-base">
+            Parece que la página a la que intentas acceder no está disponible en este momento, ha sido movida, o nos encontramos realizando tareas de mantenimiento. 
+            <br><br>
+            Te sugerimos regresar a tu área de trabajo principal.
+        </p>
+
+        <!-- Botones de acción -->
+        <div class="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4">
+            <button onclick="window.history.back()" class="w-full sm:w-auto px-6 py-2.5 border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i> Regresar
+            </button>
+            
+            <a href="{% url 'seguridad:dashboard' %}" class="w-full sm:w-auto px-6 py-2.5 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 shadow-md shadow-primary-500/30 transition-all hover:-translate-y-0.5">
+                <i class="fas fa-home mr-2"></i> Ir al Inicio
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,78 @@
+<ul class="space-y-2">
+    <!-- Dashboard -->
+    <li>
+        <a href="{% url 'seguridad:dashboard' %}" 
+           class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-primary-50 dark:hover:bg-gray-700 transition-colors {% if request.path == '/seguridad/dashboard/' %}bg-primary-50 dark:bg-gray-700 text-primary-600{% endif %}">
+            <i class="fas fa-home w-5 mr-3"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
+
+    {% for item in menu_items %}
+        <!-- Verificamos que la carpeta principal esté activa -->
+        {% if item.modulo.activo %}
+        <li>
+            <!-- Módulo padre -->
+            <button class="menu-toggle w-full flex items-center justify-between px-4 py-3 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <div class="flex items-center">
+                    <i class="fas fa-{{ item.modulo.icono|default:'folder' }} w-5 mr-3"></i>
+                    <span>{{ item.modulo.nombre }}</span>
+                </div>
+                <i class="fas fa-chevron-down text-xs transform transition-transform menu-arrow"></i>
+            </button>
+            
+            <!-- Submódulos -->
+            {% if item.submodulos %}
+            <ul class="menu-content hidden pl-4 mt-2 space-y-1">
+                {% for submodulo in item.submodulos %}
+                    <!-- Verificamos que el submódulo también esté activo -->
+                    {% if submodulo.activo %}
+                    <li>
+                        <a href="{{ submodulo.url }}" 
+                           class="flex items-center px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors {% if request.path == submodulo.url %}bg-primary-50 dark:bg-gray-700 text-primary-600{% endif %}">
+                            <i class="fas fa-circle text-xs w-5 mr-2 text-gray-400"></i>
+                            <span>{{ submodulo.nombre }}</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </li>
+        {% endif %}
+    {% endfor %}
+</ul>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggles = document.querySelectorAll('.menu-toggle');
+    
+    menuToggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const content = this.nextElementSibling;
+            const arrow = this.querySelector('.menu-arrow');
+            
+            if (content && content.classList.contains('menu-content')) {
+                content.classList.toggle('hidden');
+                arrow.classList.toggle('rotate-180');
+            }
+        });
+    });
+
+    // Abrir menú activo
+    const currentPath = window.location.pathname;
+    const activeLinks = document.querySelectorAll(`a[href="${currentPath}"]`);
+    
+    activeLinks.forEach(link => {
+        const menuContent = link.closest('.menu-content');
+        if (menuContent) {
+            menuContent.classList.remove('hidden');
+            const toggle = menuContent.previousElementSibling;
+            if (toggle) {
+                const arrow = toggle.querySelector('.menu-arrow');
+                if (arrow) arrow.classList.add('rotate-180');
+            }
+        }
+    });
+});
+</script>

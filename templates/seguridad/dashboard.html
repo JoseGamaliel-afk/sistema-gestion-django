@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Sistema de Gestión{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    
+    <!-- Encabezado moderno de Bienvenida -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div class="flex items-center gap-5">
+            <div class="relative">
+                <img src="{{ usuario.avatar_url }}" 
+                     alt="{{ usuario.nombre }}" 
+                     class="w-16 h-16 rounded-2xl shadow-sm object-cover border border-gray-200 dark:border-gray-700">
+                <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></span>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-primary-600 dark:text-primary-400 mb-1">
+                    {{ fecha_actual|date:"l, d F Y" }}
+                </p>
+                <h1 class="text-3xl font-extrabold text-gray-800 dark:text-white tracking-tight">
+                    Hola, {{ usuario.nombre }} 👋
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de Acceso Rápido -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        
+        <!-- Botón Usuarios -->
+        <a href="{% url 'seguridad:usuario_list' %}" class="group flex flex-col items-center p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 hover:-translate-y-1">
+            <div class="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-500 transition-all duration-300">
+                <i class="fas fa-users text-2xl"></i>
+            </div>
+            <h3 class="text-sm font-bold text-gray-800 dark:text-white mb-1">Usuarios</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 text-center">Gestionar cuentas</p>
+        </a>
+
+        <!-- Botón Perfiles -->
+        <a href="{% url 'seguridad:perfil_list' %}" class="group flex flex-col items-center p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-emerald-200 dark:hover:border-emerald-800 transition-all duration-300 hover:-translate-y-1">
+            <div class="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white dark:group-hover:bg-emerald-500 transition-all duration-300">
+                <i class="fas fa-id-card text-2xl"></i>
+            </div>
+            <h3 class="text-sm font-bold text-gray-800 dark:text-white mb-1">Perfiles</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 text-center">Roles del sistema</p>
+        </a>
+
+        <!-- Botón Módulos -->
+        <a href="{% url 'seguridad:modulo_list' %}" class="group flex flex-col items-center p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-amber-200 dark:hover:border-amber-800 transition-all duration-300 hover:-translate-y-1">
+            <div class="w-14 h-14 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-amber-500 group-hover:text-white dark:group-hover:bg-amber-500 transition-all duration-300">
+                <i class="fas fa-layer-group text-2xl"></i>
+            </div>
+            <h3 class="text-sm font-bold text-gray-800 dark:text-white mb-1">Módulos</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 text-center">Menús y secciones</p>
+        </a>
+
+        <!-- Botón Permisos -->
+        <a href="/seguridad/permisos-perfil/" class="group flex flex-col items-center p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-purple-200 dark:hover:border-purple-800 transition-all duration-300 hover:-translate-y-1">
+            <div class="w-14 h-14 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white dark:group-hover:bg-purple-500 transition-all duration-300">
+                <i class="fas fa-key text-2xl"></i>
+            </div>
+            <h3 class="text-sm font-bold text-gray-800 dark:text-white mb-1">Permisos</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 text-center">Reglas de acceso</p>
+        </a>
+
+    </div>
+
+    <!-- Tabla de Últimos Usuarios (Diseño Limpio) -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50">
+            <h2 class="text-base font-bold text-gray-800 dark:text-white">
+                Nuevos Registros
+            </h2>
+            <span class="px-3 py-1 bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 text-xs font-bold rounded-lg">
+                Últimos 5
+            </span>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest border-b border-gray-100 dark:border-gray-700">
+                        <th class="px-6 py-4 font-semibold">Usuario</th>
+                        <th class="px-6 py-4 font-semibold">Contacto</th>
+                        <th class="px-6 py-4 font-semibold">Estado</th>
+                        <th class="px-6 py-4 font-semibold">Fecha de Alta</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
+                    {% for usuario in ultimos_usuarios %}
+                    <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-700/30 transition-colors group">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <img src="{{ usuario.avatar_url }}" 
+                                     alt="{{ usuario.nombre }}" 
+                                     class="w-9 h-9 rounded-full object-cover ring-2 ring-gray-100 dark:ring-gray-700">
+                                <div>
+                                    <p class="text-sm font-bold text-gray-800 dark:text-gray-200">{{ usuario.nombre }}</p>
+                                    <p class="text-xs text-gray-500 font-medium">{{ usuario.perfil.nombre }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ usuario.correo }}</p>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if usuario.activo %}
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-green-600 dark:bg-green-500"></span>
+                                Activo
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-red-500"></span>
+                                Inactivo
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 font-medium">
+                            {{ usuario.fecha_creacion|date:"d/m/Y" }} <span class="text-gray-400 dark:text-gray-600">|</span> {{ usuario.fecha_creacion|date:"H:i" }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-12 text-center">
+                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 dark:bg-gray-800 mb-4">
+                                <i class="fas fa-user-slash text-2xl text-gray-400"></i>
+                            </div>
+                            <h3 class="text-sm font-bold text-gray-900 dark:text-white">Sin registros</h3>
+                            <p class="mt-1 text-sm text-gray-500">Aún no hay usuarios en el sistema.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

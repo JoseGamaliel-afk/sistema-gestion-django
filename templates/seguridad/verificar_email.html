@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Email - Sistema de Gestión</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full bg-gray-100">
+    <div class="min-h-full flex items-center justify-center p-4">
+        <div class="max-w-md w-full">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+
+                {% if success %}
+                <!-- ========================= -->
+                <!-- ÉXITO -->
+                <!-- ========================= -->
+                <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-8 py-10 text-center">
+                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check text-white text-4xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-white">¡Verificación Exitosa!</h1>
+                </div>
+
+                <div class="px-8 py-8 text-center">
+                    <p class="text-gray-600 mb-6">{{ message }}</p>
+
+                    {% if usuario %}
+                    <p class="text-gray-500 mb-6">
+                        Hola <strong>{{ usuario.nombre }}</strong>, tu cuenta está lista para usar.
+                    </p>
+                    {% endif %}
+
+                    <a href="{% url 'seguridad:login' %}" 
+                       class="inline-flex items-center justify-center w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Iniciar Sesión
+                    </a>
+                </div>
+
+                <!-- Redirección automática -->
+                <script>
+                    setTimeout(() => {
+                        window.location.href = "{% url 'seguridad:login' %}";
+                    }, 3000);
+                </script>
+
+                {% else %}
+                <!-- ========================= -->
+                <!-- ERROR -->
+                <!-- ========================= -->
+                <div class="bg-gradient-to-r from-red-500 to-rose-600 px-8 py-10 text-center">
+                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-times text-white text-4xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-white">Verificación Fallida</h1>
+                </div>
+
+                <div class="px-8 py-8 text-center">
+                    <p class="text-gray-600 mb-6">{{ message }}</p>
+
+                    <p class="text-sm text-gray-400 mb-6">
+                        El enlace puede haber expirado o ya fue utilizado.
+                    </p>
+
+                    <div class="space-y-3">
+                        <a href="{% url 'seguridad:reenviar_verificacion' %}" 
+                           class="inline-flex items-center justify-center w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                            <i class="fas fa-envelope mr-2"></i>
+                            Solicitar Nuevo Enlace
+                        </a>
+
+                        <a href="{% url 'seguridad:login' %}" 
+                           class="inline-flex items-center justify-center w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors">
+                            Volver al Login
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

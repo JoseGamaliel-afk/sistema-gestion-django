@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Permisos por Perfil - Sistema de Gestión{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Permisos por Perfil</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-1">Administración de permisos de módulos por perfil</p>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <form method="GET" class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                    Seleccionar Perfil
+                </label>
+                <select name="perfil" 
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                        onchange="this.form.submit()">
+                    <option value="">-- Seleccione un perfil --</option>
+                    {% for perfil in perfiles %}
+                    <option value="{{ perfil.id }}" {% if perfil_seleccionado.id == perfil.id %}selected{% endif %}>
+                        {{ perfil.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+
+    {% if perfil_seleccionado %}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white">
+                <i class="fas fa-key mr-2 text-primary-500"></i>
+                Permisos para: {{ perfil_seleccionado.nombre }}
+                
+                {% if perfil_seleccionado.nombre|lower == 'administrador' %}
+                    <span class="ml-2 text-xs font-normal bg-purple-100 text-purple-700 px-2 py-1 rounded">Acceso Total Inmutable</span>
+                {% elif not permisos_usuario.puede_editar %}
+                    <span class="ml-2 text-xs font-normal bg-amber-100 text-amber-700 px-2 py-1 rounded">Solo Lectura</span>
+                {% endif %}
+            </h2>
+            
+            {% if permisos_usuario.puede_editar and perfil_seleccionado.nombre|lower != 'administrador' %}
+            <button id="save-permissions-btn" 
+                    class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+                <i class="fas fa-save mr-2"></i>
+                Guardar Permisos
+            </button>
+            {% endif %}
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Módulo</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Agregar</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Editar</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Eliminar</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Consultar</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Detalle</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for grupo in matriz_permisos %}
+                    <tr class="bg-gray-100 dark:bg-gray-600">
+                        <td colspan="6" class="px-6 py-3">
+                            <span class="font-semibold text-gray-800 dark:text-white flex items-center">
+                                <i class="fas fa-{{ grupo.padre.icono|default:'folder' }} mr-2 text-primary-500"></i>
+                                {{ grupo.padre.nombre }}
+                            </span>
+                        </td>
+                    </tr>
+                    
+                    {% for item in grupo.submodulos %}
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors permiso-row" 
+                        data-modulo-id="{{ item.modulo.id }}">
+                        <td class="px-6 py-4 pl-12 text-sm text-gray-700 dark:text-gray-200">
+                            {{ item.modulo.nombre }}
+                        </td>
+                        
+                        <td class="px-6 py-4 text-center">
+                            <input type="checkbox" class="permiso-checkbox" data-tipo="agregar"
+                                   {% if item.permiso.puede_agregar or perfil_seleccionado.nombre|lower == 'administrador' %}checked{% endif %}
+                                   {% if not permisos_usuario.puede_editar or perfil_seleccionado.nombre|lower == 'administrador' %}disabled{% endif %}>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <input type="checkbox" class="permiso-checkbox" data-tipo="editar"
+                                   {% if item.permiso.puede_editar or perfil_seleccionado.nombre|lower == 'administrador' %}checked{% endif %}
+                                   {% if not permisos_usuario.puede_editar or perfil_seleccionado.nombre|lower == 'administrador' %}disabled{% endif %}>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <input type="checkbox" class="permiso-checkbox" data-tipo="eliminar"
+                                   {% if item.permiso.puede_eliminar or perfil_seleccionado.nombre|lower == 'administrador' %}checked{% endif %}
+                                   {% if not permisos_usuario.puede_editar or perfil_seleccionado.nombre|lower == 'administrador' %}disabled{% endif %}>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <input type="checkbox" class="permiso-checkbox border-2 border-primary-500" data-tipo="consultar"
+                                   {% if item.permiso.puede_consultar or perfil_seleccionado.nombre|lower == 'administrador' %}checked{% endif %}
+                                   {% if not permisos_usuario.puede_editar or perfil_seleccionado.nombre|lower == 'administrador' %}disabled{% endif %}>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <input type="checkbox" class="permiso-checkbox" data-tipo="detalle"
+                                   {% if item.permiso.puede_ver_detalle or perfil_seleccionado.nombre|lower == 'administrador' %}checked{% endif %}
+                                   {% if not permisos_usuario.puede_editar or perfil_seleccionado.nombre|lower == 'administrador' %}disabled{% endif %}>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                            <p>No hay módulos configurados</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center">
+        <div class="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-hand-pointer text-gray-400 text-3xl"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-2">Seleccione un perfil</h3>
+        <p class="text-gray-500 dark:text-gray-400">Elija un perfil para gestionar sus permisos</p>
+    </div>
+    {% endif %}
+</div>
+
+<div id="toast" class="fixed bottom-4 right-4 transform translate-y-full opacity-0 transition-all duration-300 z-50">
+    <div class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span id="toast-message"></span>
+    </div>
+</div>
+
+<style>
+    .permiso-checkbox {
+        @apply w-5 h-5 text-primary-600 rounded focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // --- NUEVA LÓGICA DE INTERACCIÓN DE CHECKBOXES ---
+    const checkboxes = document.querySelectorAll('.permiso-checkbox');
+    
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            const row = this.closest('tr');
+            const tipo = this.dataset.tipo;
+            const checkConsultar = row.querySelector('[data-tipo="consultar"]');
+            
+            // Si desmarco "Consultar", desmarco automáticamente todo lo demás en esa fila
+            if (tipo === 'consultar' && !this.checked) {
+                row.querySelectorAll('.permiso-checkbox').forEach(c => {
+                    if (c !== this && !c.disabled) {
+                        c.checked = false;
+                    }
+                });
+            } 
+            // Si marco "Agregar", "Editar", "Eliminar" o "Detalle", marco "Consultar" automáticamente
+            else if (tipo !== 'consultar' && this.checked) {
+                if (checkConsultar && !checkConsultar.disabled) {
+                    checkConsultar.checked = true;
+                }
+            }
+        });
+    });
+    // -------------------------------------------------
+
+    const saveBtn = document.getElementById('save-permissions-btn');
+    
+    if (saveBtn) {
+        saveBtn.addEventListener('click', async function() {
+            const perfilId = {{ perfil_seleccionado.id|default:'null' }};
+            if (!perfilId) return;
+            
+            const permisos = [];
+            const rows = document.querySelectorAll('.permiso-row');
+            
+            rows.forEach(row => {
+                const moduloId = row.dataset.moduloId;
+                const checkboxes = row.querySelectorAll('.permiso-checkbox');
+                
+                // Creamos el objeto con los valores iniciales en false
+                const permiso = {
+                    modulo_id: parseInt(moduloId),
+                    agregar: false, editar: false, eliminar: false, consultar: false, detalle: false
+                };
+                
+                // Llenamos el objeto según lo que esté marcado
+                checkboxes.forEach(cb => {
+                    permiso[cb.dataset.tipo] = cb.checked;
+                });
+                
+                permisos.push(permiso);
+            });
+            
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Guardando...';
+            
+            try {
+                const response = await fetch('/seguridad/permisos-perfil/guardar/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        perfil_id: perfilId,
+                        permisos: permisos
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showToast('Permisos actualizados con éxito', 'success');
+                } else {
+                    showToast(data.error || 'Error al guardar', 'error');
+                }
+            } catch (error) {
+                showToast('Error de conexión con el servidor', 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Guardar Permisos';
+            }
+        });
+    }
+});
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    const toastDiv = toast.querySelector('div');
+    
+    toastMessage.textContent = message;
+    toastDiv.className = `px-6 py-3 rounded-lg shadow-lg flex items-center ${type === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white`;
+    
+    toast.classList.remove('translate-y-full', 'opacity-0');
+    setTimeout(() => toast.classList.add('translate-y-full', 'opacity-0'), 3000);
+}
+</script>
+{% endblock %}

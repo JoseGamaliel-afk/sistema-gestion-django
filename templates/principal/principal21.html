@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Inventario - Sistema de Gestión{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Gestión de Inventario</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Control y administración del inventario</p>
+        </div>
+        <button class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+            <i class="fas fa-plus mr-2"></i>
+            Nuevo Producto
+        </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Total Productos</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ total_productos }}</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-boxes text-blue-500 text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Disponibles</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ productos_disponibles }}</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border-l-4 border-yellow-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Stock Bajo</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ productos_stock_bajo }}</p>
+                </div>
+                <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/50 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border-l-4 border-red-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Agotados</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ productos_agotados }}</p>
+                </div>
+                <div class="w-12 h-12 bg-red-100 dark:bg-red-900/50 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-times-circle text-red-500 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <button class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow text-left">
+            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-plus-circle text-blue-500 text-xl"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 dark:text-white">Entrada</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Registrar entrada</p>
+        </button>
+        
+        <button class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow text-left">
+            <div class="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-minus-circle text-green-500 text-xl"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 dark:text-white">Salida</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Registrar salida</p>
+        </button>
+        
+        <button class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow text-left">
+            <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/50 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-exchange-alt text-yellow-500 text-xl"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 dark:text-white">Transferencia</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Mover productos</p>
+        </button>
+        
+        <button class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow text-left">
+            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-clipboard-list text-purple-500 text-xl"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 dark:text-white">Inventario</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Realizar conteo</p>
+        </button>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
+                <i class="fas fa-list mr-2 text-primary-500"></i>
+                Listado de Productos
+            </h2>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Código</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Producto</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Categoría</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Stock</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Precio</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Estado</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for producto in productos %}
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono font-medium text-primary-600 dark:text-primary-400">
+                            {{ producto.codigo }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                            {{ producto.nombre }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                {{ producto.categoria }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold {% if producto.stock == 0 %}text-red-600{% elif producto.stock < producto.stock_minimo %}text-yellow-600{% else %}text-gray-900 dark:text-white{% endif %}">
+                            {{ producto.stock }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900 dark:text-white">
+                            ${{ producto.precio|floatformat:0 }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if producto.estado == 'Disponible' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400">
+                                {{ producto.estado }}
+                            </span>
+                            {% elif producto.estado == 'Stock Bajo' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400">
+                                {{ producto.estado }}
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400">
+                                {{ producto.estado }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <div class="flex items-center justify-center space-x-2">
+                                <button class="p-2 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg transition-colors" title="Agregar stock">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <button class="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

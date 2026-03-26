@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema de Gestión{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="{% load static %}{% static 'css/styles.css' %}" rel="stylesheet">
+</head>
+<body class="h-full bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    <div class="min-h-full flex">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+            <!-- Logo -->
+            <div class="flex items-center justify-center h-16 bg-primary-600 dark:bg-primary-700">
+                <i class="fas fa-cogs text-white text-2xl mr-2"></i>
+                <span class="text-white font-bold text-lg">Administrador Corporativo</span>
+            </div>
+            
+            <!-- Menu -->
+            <nav class="mt-4 px-4 overflow-y-auto h-[calc(100vh-4rem)]">
+                {% include 'partials/menu.html' %}
+            </nav>
+        </aside>
+
+        <!-- Main content -->
+        <div class="flex-1 lg:ml-64">
+            <!-- Topbar -->
+            <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-40">
+                <div class="flex items-center justify-between h-16 px-4 lg:px-6">
+                    <!-- Mobile menu button -->
+                    <button id="sidebar-toggle" class="lg:hidden p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+
+                    <!-- Breadcrumbs -->
+                    <div class="hidden md:block">
+                        {% include 'partials/breadcrumbs.html' %}
+                    </div>
+
+                    <!-- Right section -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Theme toggle -->
+                        <button id="theme-toggle" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-moon dark:hidden text-lg"></i>
+                            <i class="fas fa-sun hidden dark:block text-lg text-yellow-400"></i>
+                        </button>
+
+                        <!-- User dropdown -->
+                        <div class="relative" id="user-dropdown">
+                            <button class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                <img src="{{ usuario_actual.avatar_url }}" 
+                                     alt="{{ usuario_actual.nombre }}" 
+                                     class="w-8 h-8 rounded-full object-cover border-2 border-primary-500">
+                                <span class="hidden md:block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                    {{ usuario_actual.nombre }}
+                                </span>
+                                <i class="fas fa-chevron-down text-xs text-gray-500 dark:text-gray-400"></i>
+                            </button>
+                            
+                            <!-- Dropdown menu -->
+                            <div id="dropdown-menu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2 border dark:border-gray-700">
+                                <a href="{% url 'seguridad:mi_perfil' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    <i class="fas fa-user mr-3 text-gray-400"></i>
+                                    Ver perfil
+                                </a>
+                                <hr class="my-2 border-gray-200 dark:border-gray-700">
+                                <a href="{% url 'seguridad:logout' %}" class="flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    <i class="fas fa-sign-out-alt mr-3"></i>
+                                    Cerrar sesión
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page content -->
+            <main class="p-4 lg:p-6">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Mobile sidebar overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+
+    <script src="{% static 'js/theme.js' %}"></script>
+    <script src="{% static 'js/crud.js' %}"></script>
+    <script>
+        // User dropdown
+        const userDropdown = document.getElementById('user-dropdown');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+        
+        userDropdown.addEventListener('click', () => {
+            dropdownMenu.classList.toggle('hidden');
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!userDropdown.contains(e.target)) {
+                dropdownMenu.classList.add('hidden');
+            }
+        });
+
+        // Mobile sidebar
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+            sidebarOverlay.classList.toggle('hidden');
+        });
+        
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

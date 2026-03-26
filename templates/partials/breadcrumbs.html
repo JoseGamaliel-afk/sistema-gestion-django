@@ -1,0 +1,16 @@
+<nav class="flex items-center space-x-2 text-sm">
+    <a href="{% url 'seguridad:dashboard' %}" class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
+        <i class="fas fa-home"></i>
+    </a>
+    
+    {% for crumb in breadcrumbs %}
+    <span class="text-gray-400 dark:text-gray-500">/</span>
+    {% if crumb.url %}
+    <a href="{{ crumb.url }}" class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
+        {{ crumb.nombre }}
+    </a>
+    {% else %}
+    <span class="text-gray-700 dark:text-gray-200 font-medium">{{ crumb.nombre }}</span>
+    {% endif %}
+    {% endfor %}
+</nav>
