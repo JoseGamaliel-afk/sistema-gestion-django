@@ -1,6 +1,9 @@
 from django.shortcuts import render
 from django.views import View
 
+# 🔐 IMPORTANTE: importar el servicio de permisos
+from apps.seguridad.services import PermisosService
+
 
 # ===============================
 # 🔹 PRINCIPAL 1.1 - VENTAS
@@ -18,11 +21,18 @@ class Principal11View(View):
             {'id': 5, 'cliente': 'Pedro Sánchez', 'producto': 'Webcam HD', 'cantidad': 2, 'total': 180000, 'fecha': '2024-01-11', 'estado': 'Completada'},
         ]
 
+        # 🔐 PERMISOS
+        permisos = PermisosService.obtener_permisos_modulo(
+            request.usuario_actual,
+            request.path
+        )
+
         context = {
             'ventas': ventas,
             'total_ventas': len(ventas),
             'ventas_completadas': len([v for v in ventas if v['estado'] == 'Completada']),
             'ventas_pendientes': len([v for v in ventas if v['estado'] == 'Pendiente']),
+            'permisos': permisos,
             'breadcrumbs': [
                 {'nombre': 'Principal 1', 'url': None},
                 {'nombre': 'Gestión de Ventas', 'url': None}
@@ -48,10 +58,16 @@ class Principal12View(View):
             {'id': 5, 'nombre': 'Facturación Semanal', 'tipo': 'Facturación', 'fecha': '2024-01-11', 'estado': 'Generado'},
         ]
 
+        permisos = PermisosService.obtener_permisos_modulo(
+            request.usuario_actual,
+            request.path
+        )
+
         context = {
             'reportes': reportes,
             'total_reportes': len(reportes),
             'reportes_generados': len([r for r in reportes if r['estado'] == 'Generado']),
+            'permisos': permisos,
             'breadcrumbs': [
                 {'nombre': 'Principal 1', 'url': None},
                 {'nombre': 'Reportes', 'url': None}
@@ -76,12 +92,18 @@ class Principal21View(View):
             {'codigo': 'P004', 'nombre': 'Monitor LG 27"', 'categoria': 'Tecnología', 'stock': 7, 'stock_minimo': 3, 'precio': 850000, 'estado': 'Disponible'},
         ]
 
+        permisos = PermisosService.obtener_permisos_modulo(
+            request.usuario_actual,
+            request.path
+        )
+
         context = {
             'productos': productos,
             'total_productos': len(productos),
             'productos_disponibles': len([p for p in productos if p['estado'] == 'Disponible']),
             'productos_stock_bajo': len([p for p in productos if p['estado'] == 'Stock Bajo']),
             'productos_agotados': len([p for p in productos if p['estado'] == 'Agotado']),
+            'permisos': permisos,
             'breadcrumbs': [
                 {'nombre': 'Principal 2', 'url': None},
                 {'nombre': 'Inventario', 'url': None}
@@ -106,12 +128,18 @@ class Principal22View(View):
             {'nombre': 'Ana Martínez', 'documento': '78912345', 'email': 'ana@email.com', 'ciudad': 'Barranquilla', 'tipo': 'Premium', 'compras': 20, 'estado': 'Activo'},
         ]
 
+        permisos = PermisosService.obtener_permisos_modulo(
+            request.usuario_actual,
+            request.path
+        )
+
         context = {
             'clientes': clientes,
             'total_clientes': len(clientes),
             'clientes_activos': len([c for c in clientes if c['estado'] == 'Activo']),
             'clientes_premium': len([c for c in clientes if c['tipo'] == 'Premium']),
             'total_ventas': sum([c['compras'] * 100000 for c in clientes]),
+            'permisos': permisos,
             'breadcrumbs': [
                 {'nombre': 'Principal 2', 'url': None},
                 {'nombre': 'Clientes', 'url': None}

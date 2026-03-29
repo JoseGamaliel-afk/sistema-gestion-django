@@ -5,71 +5,51 @@
 
 {% block content %}
 <div class="space-y-6">
+
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Gestión de Clientes</h1>
             <p class="text-gray-500 dark:text-gray-400 mt-1">Administración de clientes del sistema</p>
         </div>
+
+        {% if permisos.puede_agregar %}
         <button class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
             <i class="fas fa-plus mr-2"></i>
             Nuevo Cliente
         </button>
+        {% endif %}
     </div>
 
     <!-- Stats -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Total Clientes</p>
-                    <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ total_clientes }}</p>
-                </div>
-                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-users text-blue-500 text-xl"></i>
-                </div>
-            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">Total Clientes</p>
+            <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ total_clientes }}</p>
         </div>
-        
+
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border-l-4 border-green-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Clientes Activos</p>
-                    <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ clientes_activos }}</p>
-                </div>
-                <div class="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-user-check text-green-500 text-xl"></i>
-                </div>
-            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">Clientes Activos</p>
+            <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ clientes_activos }}</p>
         </div>
-        
+
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border-l-4 border-yellow-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Clientes Premium</p>
-                    <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ clientes_premium }}</p>
-                </div>
-                <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/50 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-crown text-yellow-500 text-xl"></i>
-                </div>
-            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">Clientes Premium</p>
+            <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ clientes_premium }}</p>
         </div>
-        
+
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Total Ventas</p>
-                    <p class="text-xl font-bold text-gray-800 dark:text-white">${{ total_ventas|floatformat:0 }}</p>
-                </div>
-                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-dollar-sign text-purple-500 text-xl"></i>
-                </div>
-            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">Total Ventas</p>
+            <p class="text-xl font-bold text-gray-800 dark:text-white">
+                ${{ total_ventas|floatformat:0 }}
+            </p>
         </div>
     </div>
 
     <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+        {% if permisos.puede_agregar %}
         <button class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow text-left">
             <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center mb-4">
                 <i class="fas fa-user-plus text-blue-500 text-xl"></i>
@@ -77,7 +57,9 @@
             <h3 class="font-semibold text-gray-800 dark:text-white">Registrar</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Nuevo cliente</p>
         </button>
-        
+        {% endif %}
+
+        {% if permisos.puede_consultar %}
         <button class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow text-left">
             <div class="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-lg flex items-center justify-center mb-4">
                 <i class="fas fa-file-export text-green-500 text-xl"></i>
@@ -85,7 +67,9 @@
             <h3 class="font-semibold text-gray-800 dark:text-white">Exportar</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Descargar listado</p>
         </button>
-        
+        {% endif %}
+
+        {% if permisos.puede_editar %}
         <button class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow text-left">
             <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/50 rounded-lg flex items-center justify-center mb-4">
                 <i class="fas fa-envelope text-yellow-500 text-xl"></i>
@@ -93,7 +77,9 @@
             <h3 class="font-semibold text-gray-800 dark:text-white">Campañas</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Email marketing</p>
         </button>
-        
+        {% endif %}
+
+        {% if permisos.puede_consultar %}
         <button class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow text-left">
             <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center mb-4">
                 <i class="fas fa-chart-pie text-purple-500 text-xl"></i>
@@ -101,9 +87,10 @@
             <h3 class="font-semibold text-gray-800 dark:text-white">Estadísticas</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Ver métricas</p>
         </button>
+        {% endif %}
     </div>
 
-    <!-- Table -->
+    <!-- Tabla -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h2 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
@@ -111,9 +98,11 @@
                 Listado de Clientes
             </h2>
         </div>
-        
+
         <div class="overflow-x-auto">
             <table class="w-full">
+
+                <!-- HEADER -->
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Cliente</th>
@@ -126,73 +115,78 @@
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Acciones</th>
                     </tr>
                 </thead>
+
+                <!-- BODY -->
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     {% for cliente in clientes %}
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/50 rounded-full flex items-center justify-center mr-3">
-                                    <span class="text-primary-600 dark:text-primary-400 font-semibold">{{ cliente.nombre|slice:":1" }}</span>
-                                </div>
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ cliente.nombre }}</span>
-                            </div>
+
+                        <td class="px-6 py-4">
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">
+                                {{ cliente.nombre }}
+                            </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                             {{ cliente.documento }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                             {{ cliente.email }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+
+                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                             {{ cliente.ciudad }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {% if cliente.tipo == 'Premium' %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400">
-                                <i class="fas fa-crown mr-1 text-xs"></i>{{ cliente.tipo }}
-                            </span>
-                            {% elif cliente.tipo == 'Regular' %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-400">
+
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-400 rounded">
                                 {{ cliente.tipo }}
                             </span>
-                            {% else %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400">
-                                {{ cliente.tipo }}
-                            </span>
-                            {% endif %}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-gray-900 dark:text-white">
+
+                        <td class="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-white">
                             {{ cliente.compras }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {% if cliente.estado == 'Activo' %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400">
+
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400 rounded">
                                 {{ cliente.estado }}
                             </span>
-                            {% else %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400">
-                                {{ cliente.estado }}
-                            </span>
-                            {% endif %}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
+
+                        <!-- ACCIONES -->
+                        <td class="px-6 py-4 text-center">
                             <div class="flex items-center justify-center space-x-2">
-                                <button class="p-2 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg transition-colors" title="Ver detalle">
+
+                                {% if permisos.puede_ver_detalle %}
+                                <button class="p-2 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg transition-colors">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <button class="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors" title="Editar">
+                                {% endif %}
+
+                                {% if permisos.puede_editar %}
+                                <button class="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors" title="Eliminar">
+                                {% endif %}
+
+                                {% if permisos.puede_eliminar %}
+                                <button class="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors">
                                     <i class="fas fa-trash"></i>
                                 </button>
+                                {% endif %}
+
                             </div>
                         </td>
+
                     </tr>
                     {% endfor %}
                 </tbody>
+
             </table>
         </div>
     </div>
+
 </div>
 {% endblock %}
