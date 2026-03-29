@@ -72,6 +72,13 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-center">
                             <div class="flex items-center justify-center space-x-2">
+                                {% if permisos.puede_ver_detalle %}
+                                <button onclick="verDetalle({{ perfil.id }})" 
+                                        class="p-2 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg transition-colors"
+                                        title="Ver detalle">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                {% endif %}
                                 {% if permisos.puede_editar %}
                                 <a href="{% url 'seguridad:perfil_update' perfil.id %}" 
                                    class="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
@@ -140,9 +147,9 @@
 
 <!-- Delete Modal -->
 <div id="delete-modal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+    <div class="absolute inset-0 bg-black bg-opacity-50 transition-opacity"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6 relative">
             <div class="text-center">
                 <div class="w-16 h-16 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
@@ -166,9 +173,83 @@
     </div>
 </div>
 
+<!-- Detail Modal -->
+<div id="detail-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full p-6 relative">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Detalle de Perfil</h3>
+                <button onclick="cerrarModalDetalle()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="detail-content" class="space-y-4">
+                <!-- El contenido se cargará vía JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 let deleteId = null;
 
+// Funciones del Modal de Detalles
+async function verDetalle(id) {
+    try {
+        const response = await fetch(`/seguridad/perfiles/${id}/detalle/`);
+        const data = await response.json();
+        
+        const content = document.getElementById('detail-content');
+        
+        // Formatear el estado para mostrarlo con colores
+        const estadoHTML = data.activo 
+            ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400"><span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-green-500"></span>Activo</span>' 
+            : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400"><span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-red-500"></span>Inactivo</span>';
+
+        content.innerHTML = `
+            <div class="grid grid-cols-1 gap-4">
+                <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Nombre del Perfil</p>
+                    <p class="text-xl font-semibold text-gray-900 dark:text-white">${data.nombre}</p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Estado</p>
+                    <div>${estadoHTML}</div>
+                </div>
+
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Descripción</p>
+                    <p class="text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-sm">
+                        ${data.descripcion || 'Sin descripción'}
+                    </p>
+                </div>
+                
+                ${data.fecha_creacion ? `
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Fecha de Creación</p>
+                    <p class="font-medium text-gray-900 dark:text-white">${data.fecha_creacion}</p>
+                </div>
+                ` : ''}
+            </div>
+        `;
+        
+        document.getElementById('detail-modal').classList.remove('hidden');
+    } catch (error) {
+        if (typeof CrudManager !== 'undefined') {
+            CrudManager.showToast('Error al cargar los detalles del perfil', 'error');
+        } else {
+            alert('Error al cargar los detalles del perfil');
+        }
+    }
+}
+
+function cerrarModalDetalle() {
+    document.getElementById('detail-modal').classList.add('hidden');
+}
+
+// Funciones del Modal de Eliminar
 function confirmarEliminar(id, nombre) {
     deleteId = id;
     document.getElementById('delete-name').textContent = nombre;
@@ -195,25 +276,32 @@ document.getElementById('confirm-delete-btn').addEventListener('click', async fu
         const data = await response.json();
         
         if (data.success) {
-            // ✅ Mensaje bonito
-            CrudManager.showToast(data.message || 'Perfil eliminado correctamente', 'success');
+            if (typeof CrudManager !== 'undefined') {
+                CrudManager.showToast(data.message || 'Perfil eliminado correctamente', 'success');
+            } else {
+                alert(data.message || 'Perfil eliminado correctamente');
+            }
 
-            // Cerrar modal
             cerrarModal();
 
-            // Recargar después de 1 segundo
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
 
         } else {
-            // ❌ Error bonito (sin alert)
-            CrudManager.showToast(data.error || 'Error al eliminar', 'error');
+            if (typeof CrudManager !== 'undefined') {
+                CrudManager.showToast(data.error || 'Error al eliminar', 'error');
+            } else {
+                alert(data.error || 'Error al eliminar');
+            }
         }
 
     } catch (error) {
-        // ❌ Error de conexión bonito
-        CrudManager.showToast('Error de conexión con el servidor', 'error');
+        if (typeof CrudManager !== 'undefined') {
+            CrudManager.showToast('Error de conexión con el servidor', 'error');
+        } else {
+            alert('Error de conexión con el servidor');
+        }
     }
 });
 </script>

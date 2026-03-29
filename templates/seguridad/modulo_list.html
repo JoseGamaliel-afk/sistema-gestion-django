@@ -51,6 +51,13 @@
                         </div>
                         
                         <div class="flex items-center space-x-1" onclick="event.stopPropagation();">
+                            {% if permisos.puede_ver_detalle %}
+                            <button onclick="verDetalle({{ padre.id }})" 
+                                    class="p-1.5 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg transition-colors"
+                                    title="Ver Detalle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% endif %}
                             {% if permisos.puede_editar %}
                             <a href="{% url 'seguridad:modulo_update' padre.id %}" 
                                class="p-1.5 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
@@ -83,6 +90,13 @@
                             </div>
 
                             <div class="flex items-center space-x-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                {% if permisos.puede_ver_detalle %}
+                                <button onclick="verDetalle({{ hijo.id }})" 
+                                        class="p-1.5 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg transition-colors"
+                                        title="Ver Detalle">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                {% endif %}
                                 {% if permisos.puede_editar %}
                                 <a href="{% url 'seguridad:modulo_update' hijo.id %}" 
                                    class="p-1.5 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
@@ -133,6 +147,7 @@
     </div>
 </div>
 
+<!-- Modal Eliminar -->
 <div id="delete-modal" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-black bg-opacity-50 transition-opacity"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4">
@@ -160,9 +175,101 @@
     </div>
 </div>
 
+<!-- Modal Detalle -->
+<div id="detail-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full p-6 relative">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Detalle de Módulo</h3>
+                <button onclick="cerrarModalDetalle()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="detail-content" class="space-y-4">
+                <!-- El contenido se cargará vía JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 let deleteId = null;
 
+// ----- FUNCIONES DE VER DETALLE -----
+async function verDetalle(id) {
+    try {
+        const response = await fetch(`/seguridad/modulos/${id}/detalle/`);
+        
+        // Verificamos si la respuesta del servidor es correcta
+        if (!response.ok) {
+            throw new Error('Error en la petición al servidor');
+        }
+
+        const data = await response.json();
+        const content = document.getElementById('detail-content');
+        
+        const estadoHTML = data.activo 
+            ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400"><span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-green-500"></span>Activo</span>' 
+            : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400"><span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-red-500"></span>Inactivo</span>';
+
+        // Preparamos el HTML a inyectar
+        content.innerHTML = `
+            <div class="grid grid-cols-1 gap-4">
+                <div class="border-b border-gray-200 dark:border-gray-700 pb-4 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center">
+                        <i class="fas fa-${data.icono || 'folder'} text-primary-600 dark:text-primary-400 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Nombre del Módulo</p>
+                        <p class="text-xl font-semibold text-gray-900 dark:text-white">${data.nombre}</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Ruta / URL</p>
+                        <p class="font-medium text-gray-900 dark:text-white font-mono text-sm break-all">${data.url || '-'}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Orden</p>
+                        <p class="font-medium text-gray-900 dark:text-white">${data.orden || '0'}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Módulo Padre</p>
+                        <p class="font-medium text-gray-900 dark:text-white">${data.padre || 'Principal (Carpeta)'}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Estado</p>
+                        <div>${estadoHTML}</div>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Descripción</p>
+                    <p class="text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-sm">
+                        ${data.descripcion || 'Sin descripción'}
+                    </p>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('detail-modal').classList.remove('hidden');
+    } catch (error) {
+        if (typeof CrudManager !== 'undefined') {
+            CrudManager.showToast('Error al cargar el detalle. Verifica que exista la vista ModuloDetailView', 'error');
+        } else {
+            alert('Error al cargar el detalle. Verifica que exista la vista y la URL de ModuloDetailView.');
+        }
+    }
+}
+
+function cerrarModalDetalle() {
+    document.getElementById('detail-modal').classList.add('hidden');
+}
+
+
+// ----- FUNCIONES DE ELIMINAR -----
 function confirmarEliminar(id, nombre) {
     deleteId = id;
     document.getElementById('delete-name').textContent = nombre;

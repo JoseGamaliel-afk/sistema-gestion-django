@@ -4,6 +4,12 @@ from . import views
 app_name = 'seguridad'
 
 urlpatterns = [
+
+    # =========================
+    # 🔥 HOME INTELIGENTE (ENTRY POINT)
+    # =========================
+    path('', views.SeguridadHomeView.as_view(), name='home'),
+
     # =========================
     # AUTH
     # =========================
@@ -15,16 +21,8 @@ urlpatterns = [
     # VERIFICACIÓN DE EMAIL
     # =========================
     path('verificar-email/<str:token>/', views.VerificarEmailView.as_view(), name='verificar_email'),
-
-    # 🔹 Vista normal (opcional, si usas formulario tradicional)
     path('reenviar-verificacion/', views.ReenviarVerificacionView.as_view(), name='reenviar_verificacion'),
-
-    # 🔹 API (USADA por tu JS - IMPORTANTE)
-    path(
-        'api/reenviar-verificacion/<int:pk>/',
-        views.ReenviarVerificacionAPIView.as_view(),
-        name='api_reenviar_verificacion'
-    ),
+    path('api/reenviar-verificacion/<int:pk>/', views.ReenviarVerificacionAPIView.as_view(), name='api_reenviar_verificacion'),
 
     # =========================
     # RECUPERACIÓN DE PASSWORD
@@ -44,6 +42,7 @@ urlpatterns = [
     path('perfiles/crear/', views.PerfilCreateView.as_view(), name='perfil_create'),
     path('perfiles/<int:pk>/editar/', views.PerfilUpdateView.as_view(), name='perfil_update'),
     path('perfiles/<int:pk>/eliminar/', views.PerfilDeleteView.as_view(), name='perfil_delete'),
+    path('perfiles/<int:pk>/detalle/', views.PerfilDetailView.as_view(), name='perfil_detail'),
 
     # =========================
     # MÓDULOS
@@ -52,6 +51,7 @@ urlpatterns = [
     path('modulos/crear/', views.ModuloCreateView.as_view(), name='modulo_create'),
     path('modulos/<int:pk>/editar/', views.ModuloUpdateView.as_view(), name='modulo_update'),
     path('modulos/<int:pk>/eliminar/', views.ModuloDeleteView.as_view(), name='modulo_delete'),
+    path('modulos/<int:pk>/detalle/', views.ModuloDetailView.as_view(), name='modulo_detail'),
 
     # =========================
     # PERMISOS PERFIL

@@ -10,7 +10,8 @@ class JWTAuthenticationMiddleware:
     # 0. Rutas EXACTAS que siempre pasan sin importar nada
     EXACT_PUBLIC_PATHS = [
         '/',
-        '/favicon.ico'
+        '/favicon.ico',
+        '/seguridad/',
     ]
 
     # 1. Rutas que NO requieren estar logueado (basta con que empiecen con esto)

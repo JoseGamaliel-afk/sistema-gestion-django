@@ -900,3 +900,44 @@ class ReenviarVerificacionAPIView(View):
                 'error': str(e)
             }, status=500)
         
+class PerfilDetailView(View):
+    def get(self, request, pk):
+        perfil = get_object_or_404(Perfil, pk=pk)
+
+        return JsonResponse({
+            'id': perfil.id,
+            'nombre': perfil.nombre,
+            'descripcion': perfil.descripcion,
+            'activo': perfil.activo,
+            'fecha_creacion': perfil.fecha_creacion.strftime('%d/%m/%Y %H:%M') if hasattr(perfil, 'fecha_creacion') else ''
+        })
+    
+class ModuloDetailView(View):
+    """Vista de detalle de módulo en JSON"""
+    def get(self, request, pk):
+        modulo = get_object_or_404(Modulo, pk=pk)
+        return JsonResponse({
+            'id': modulo.id,
+            'nombre': modulo.nombre,
+            'descripcion': modulo.descripcion,
+            'url': getattr(modulo, 'url', ''), # Usamos getattr por si tu modelo no tiene el campo exacto 'url'
+            'icono': modulo.icono,
+            'orden': modulo.orden,
+            'padre': modulo.padre.nombre if modulo.padre else None,
+            'activo': modulo.activo,
+        })
+    
+class SeguridadHomeView(View):
+    def get(self, request):
+        if hasattr(request, 'usuario_actual'):
+            usuario = request.usuario_actual
+
+            modulos = PermisosService.obtener_modulos_usuario(usuario)
+
+            for modulo in modulos:
+                if modulo['puede_consultar']:
+                    return redirect(modulo['ruta'])
+
+            return redirect('seguridad:dashboard')
+
+        return redirect('seguridad:login')
