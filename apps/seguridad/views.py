@@ -635,6 +635,8 @@ class UsuarioDetailView(View):
         })
 
 
+from django.contrib import messages
+
 class MiPerfilView(View):
     """Vista del perfil del usuario actual"""
     template_name = 'seguridad/mi_perfil.html'
@@ -651,11 +653,33 @@ class MiPerfilView(View):
         return render(request, self.template_name, context)
 
     def post(self, request):
-        form = MiPerfilForm(request.POST, request.FILES, instance=request.usuario_actual)
+        usuario = request.usuario_actual
+        form = MiPerfilForm(request.POST, request.FILES, instance=usuario)
+
+        # 🔥 VALIDACIÓN EXTRA DE IMAGEN (SEGURIDAD)
+        avatar = request.FILES.get('avatar')
+
+        if avatar:
+            # Validar tipo
+            if not avatar.content_type.startswith('image/'):
+                messages.error(request, 'Solo se permiten archivos de tipo imagen')
+                return self.render_with_context(request, form)
+
+            # Validar tamaño (2MB)
+            if avatar.size > 2 * 1024 * 1024:
+                messages.error(request, 'La imagen no debe superar los 2MB')
+                return self.render_with_context(request, form)
+
         if form.is_valid():
             form.save()
+            messages.success(request, 'Perfil actualizado correctamente')
             return redirect('seguridad:mi_perfil')
-        
+
+        messages.error(request, 'Corrige los errores del formulario')
+        return self.render_with_context(request, form)
+
+    def render_with_context(self, request, form):
+        """Helper para evitar repetir código"""
         context = {
             'form': form,
             'usuario': request.usuario_actual,
@@ -664,7 +688,6 @@ class MiPerfilView(View):
             ]
         }
         return render(request, self.template_name, context)
-    
 
     
 
