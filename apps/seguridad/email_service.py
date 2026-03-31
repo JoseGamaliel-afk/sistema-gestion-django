@@ -152,5 +152,3 @@ class EmailService:
         return self.enviar_email(usuario.correo, subject, html_content)
 
 
-# 🔥 INSTANCIA GLOBAL
-email_service = EmailService()
