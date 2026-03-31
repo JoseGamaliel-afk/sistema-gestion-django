@@ -6,29 +6,25 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 class EmailService:
-    """Servicio para envío de emails con SendGrid (Modo Simulación Eliminado)"""
+    """Servicio para envío de emails con SendGrid (Modo Moderno Simplificado)"""
     
     def __init__(self):
         self.sg = None
-        self.from_email = None
         
         # Leemos las variables directamente de settings
-        self.api_key = getattr(settings, 'SENDGRID_API_KEY', '')
-        self.from_email_addr = getattr(settings, 'SENDGRID_FROM_EMAIL', '')
-        self.from_name = getattr(settings, 'SENDGRID_FROM_NAME', 'Sistema de Gestión')
+        self.api_key = getattr(settings, 'SENDGRID_API_KEY', '').strip()
+        self.from_email_addr = getattr(settings, 'SENDGRID_FROM_EMAIL', '').strip()
+        self.from_name = getattr(settings, 'SENDGRID_FROM_NAME', 'Sistema de Gestión').strip()
         
         try:
             from sendgrid import SendGridAPIClient
-            from sendgrid.helpers.mail import Mail, Email, To, Content
+            from sendgrid.helpers.mail import Mail
             
+            # Solo necesitamos Mail, como en la documentación
             self._Mail = Mail
-            self._Email = Email
-            self._To = To
-            self._Content = Content
             
             if self.api_key and self.from_email_addr:
                 self.sg = SendGridAPIClient(api_key=self.api_key)
-                self.from_email = self._Email(self.from_email_addr, self.from_name)
                 print(f"✅ EmailService Listo: Operando con {self.from_email_addr}")
             else:
                 print("❌ EmailService ERROR: Faltan credenciales en .env")
@@ -37,22 +33,24 @@ class EmailService:
             print("❌ ERROR CRÍTICO: Librería 'sendgrid' no instalada. Ejecuta: pip install sendgrid")
 
     def enviar_email(self, to_email, subject, html_content, text_content=None):
-        """Envío real y forzado usando SendGrid"""
+        """Envío real usando la estructura oficial de SendGrid"""
         
         if not self.api_key or not self.from_email_addr:
             print(f"❌ ENVÍO CANCELADO A {to_email}: No hay credenciales configuradas.")
             return {'success': False, 'error': 'Credenciales no configuradas'}
         
         try:
+            # Estructura exacta de la documentación de SendGrid
             message = self._Mail(
-                from_email=self.from_email,
-                to_emails=self._To(to_email),
+                from_email=(self.from_email_addr, self.from_name), # Tupla para incluir nombre y correo
+                to_emails=to_email,
                 subject=subject,
                 html_content=html_content
             )
             
+            # Si hay texto plano, se agrega como propiedad simplificada
             if text_content:
-                message.add_content(self._Content("text/plain", text_content))
+                message.plain_text_content = text_content
             
             # Petición a SendGrid
             response = self.sg.send(message)

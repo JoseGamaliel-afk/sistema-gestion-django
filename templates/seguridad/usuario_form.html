@@ -267,11 +267,14 @@ document.getElementById('avatar-input').addEventListener('change', function(e) {
 // Reenviar verificación
 async function reenviarVerificacion(usuarioId) {
     try {
+        // CAMBIO: Leemos el token de seguridad directamente del formulario HTML
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
         const response = await fetch(`/seguridad/api/reenviar-verificacion/${usuarioId}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
+                'X-CSRFToken': csrfToken // CAMBIO: Usamos la variable en lugar de '{{ csrf_token }}'
             }
         });
         

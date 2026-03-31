@@ -23,6 +23,11 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
+# AGREGA ESTO PARA QUE RENDER PERMITA POSTS HTTPS
+CSRF_TRUSTED_ORIGINS = [
+    'https://sistema-gestion-django.onrender.com'
+]
+
 # ========================
 # 📦 APLICACIONES
 # ========================
@@ -184,7 +189,7 @@ if not SENDGRID_API_KEY or not SENDGRID_FROM_EMAIL:
 # ========================
 # 🔗 APP URL
 # ========================
-APP_URL = os.getenv('APP_URL', 'http://localhost:8000')
+APP_URL = os.getenv('APP_URL', 'https://sistema-gestion-django.onrender.com')
 
 # Token de verificación (horas)
 EMAIL_VERIFICATION_EXPIRY_HOURS = int(os.getenv('EMAIL_VERIFICATION_EXPIRY_HOURS', 24))

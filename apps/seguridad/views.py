@@ -551,7 +551,20 @@ class UsuarioCreateView(View):
     def post(self, request):
         form = UsuarioForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            # 1. Guardamos al usuario en la base de datos
+            usuario = form.save()
+            
+            # 2. Leemos si el administrador marcó la casilla de "Enviar correo"
+            enviar_correo = form.cleaned_data.get('enviar_verificacion', False)
+            
+            if enviar_correo:
+                # Si marcó la casilla, enviamos el correo de verificación
+                email_service.enviar_verificacion_email(usuario)
+            else:
+                # Si NO marcó la casilla, lo auto-verificamos para que no requiera el correo
+                usuario.email_verificado = True
+                usuario.save()
+
             return redirect('seguridad:usuario_list')
         
         context = {
@@ -564,7 +577,6 @@ class UsuarioCreateView(View):
             ]
         }
         return render(request, self.template_name, context)
-
 
 class UsuarioUpdateView(View):
     """Vista para editar usuario"""
@@ -762,12 +774,10 @@ class RecuperarPasswordView(View):
         correo = request.POST.get('correo', '').strip()
         try:
             usuario = Usuario.objects.get(correo=correo, activo=True)
-            # Aquí es donde se dispara el servicio
-            email_service.enviar_email(
-                usuario.correo, 
-                "Recuperar Contraseña", 
-                f"Usa este link: {usuario.generar_token_recuperacion()}"
-            )
+            
+            # CAMBIO: Usar tu función que ya arma la URL dinámica y el HTML bonito
+            email_service.enviar_recuperacion_password(usuario)
+            
         except Usuario.DoesNotExist:
             pass # Por seguridad no avisamos si el correo existe o no
             

@@ -32,6 +32,8 @@ class JWTAuthenticationMiddleware:
         'dashboard',
         'logout',
         'mi_perfil',
+        'api_reenviar_verificacion', # 🔥 AGREGADO: Permite reenviar la verificación
+        'permisosperfil_save',       # 🔥 AGREGADO: Permite guardar permisos por AJAX
     ]
 
     def __init__(self, get_response):
@@ -49,8 +51,6 @@ class JWTAuthenticationMiddleware:
             if path.startswith(public):
                 return self.get_response(request)
                 
-        # ... (de aquí para abajo todo se queda igual: PASO 2, PASO 3, etc.)
-
         # PASO 2: Obtener token y validar usuario
         token = request.session.get('jwt_token') or request.COOKIES.get('jwt_token')
 
@@ -68,6 +68,12 @@ class JWTAuthenticationMiddleware:
                         return self.get_response(request)
                 except Resolver404:
                     pass # Si la ruta no existe, lo dejamos seguir para que tire un 404 normal
+
+                # 🔥 PASO 3.5: EXCEPCIÓN GENERAL PARA LA API INTERNA 🔥
+                # Dejamos pasar todas las rutas que empiecen con /seguridad/api/ 
+                # SIEMPRE Y CUANDO el usuario ya esté autenticado (que es este caso)
+                if path.startswith('/seguridad/api/'):
+                    return self.get_response(request)
 
                 # PASO 4: CANDADO DE SEGURIDAD ESTRICTO PARA MÓDULOS
                 partes_path = path.strip('/').split('/')
