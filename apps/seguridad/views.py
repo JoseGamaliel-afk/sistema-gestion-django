@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.conf import settings
 from django.utils import timezone
-from apps.seguridad.email_service import email_service
+
 
 from .models import Usuario, Perfil, Modulo, PermisosPerfil
 from .forms import LoginForm, UsuarioForm, PerfilForm, ModuloForm, MiPerfilForm

@@ -152,3 +152,5 @@ class EmailService:
         return self.enviar_email(usuario.correo, subject, html_content)
 
 
+# Instancia global del servicio (IMPORTANTE)
+email_service = EmailService()
