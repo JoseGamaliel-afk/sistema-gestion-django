@@ -112,7 +112,7 @@ class EmailService:
 
     def enviar_recuperacion_password(self, usuario):
         token = usuario.generar_token_recuperacion()
-        app_url = getattr(settings, 'APP_URL', 'http://localhost:8000').rstrip('/')
+        app_url = getattr(settings, 'APP_URL', 'https://sistema-gestion-django.onrender.com').rstrip('/')
         reset_url = f"{app_url}/seguridad/restablecer-password/{token}/"
         
         subject = "Recuperación de contraseña - Sistema de Gestión"
