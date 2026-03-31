@@ -11,8 +11,8 @@ class EmailService:
         self.sg = None
         self.from_email = None
 
-        self.api_key = getattr(settings, 'SENDGRID_API_KEY', '')
-        self.from_email_addr = getattr(settings, 'SENDGRID_FROM_EMAIL', '')
+        self.api_key = getattr(settings, 'SENDGRID_API_KEY', '').strip()
+        self.from_email_addr = getattr(settings, 'SENDGRID_FROM_EMAIL', '').strip()
         self.from_name = getattr(settings, 'SENDGRID_FROM_NAME', 'Sistema de Gestión')
 
         try:
@@ -27,18 +27,15 @@ class EmailService:
             if self.api_key and self.from_email_addr:
                 self.sg = SendGridAPIClient(api_key=self.api_key)
                 self.from_email = self._Email(self.from_email_addr, self.from_name)
-                print(f"✅ EmailService listo con {self.from_email_addr}")
+                logger.info(f"EmailService listo con {self.from_email_addr}")
             else:
-                print("❌ Faltan credenciales de SendGrid")
+                logger.error("Faltan credenciales de SendGrid")
 
         except ImportError:
-            print("❌ Instala sendgrid: pip install sendgrid")
+            logger.critical("Instala sendgrid: pip install sendgrid")
 
-    # 🔥 FUNCIÓN CENTRAL (IMPORTANTE)
+    # 🔥 URL BASE CENTRALIZADA
     def _get_app_url(self):
-        """
-        Obtiene la URL base SIEMPRE en producción
-        """
         url = getattr(settings, 'APP_URL', '').strip()
 
         if not url:
@@ -46,10 +43,11 @@ class EmailService:
 
         return url.rstrip('/')
 
+    # 🔥 ENVÍO GENERAL
     def enviar_email(self, to_email, subject, html_content, text_content=None):
         if not self.sg:
-            print(f"❌ No se puede enviar correo a {to_email}: SendGrid no configurado")
-            return {'success': False}
+            logger.error(f"No se puede enviar correo a {to_email}: SendGrid no configurado")
+            return {'success': False, 'error': 'SendGrid no configurado'}
 
         try:
             message = self._Mail(
@@ -64,21 +62,21 @@ class EmailService:
 
             response = self.sg.send(message)
 
-            print(f"📨 Status SendGrid: {response.status_code}")
+            logger.info(f"SendGrid status: {response.status_code}")
 
             if response.status_code in [200, 201, 202]:
-                print(f"✅ Correo enviado a {to_email}")
+                logger.info(f"Correo enviado a {to_email}")
                 return {'success': True}
             else:
-                print(f"❌ Error SendGrid: {response.status_code}")
-                print(response.body)
-                return {'success': False}
+                logger.error(f"Error SendGrid: {response.status_code}")
+                logger.error(response.body)
+                return {'success': False, 'status_code': response.status_code}
 
         except Exception as e:
-            logger.error(f"Error enviando correo: {e}")
-            print(f"❌ Error crítico: {e}")
-            return {'success': False}
+            logger.exception(f"Error enviando correo: {e}")
+            return {'success': False, 'error': str(e)}
 
+    # 🔐 VERIFICACIÓN DE EMAIL
     def enviar_verificacion_email(self, usuario):
         token = usuario.generar_token_verificacion()
 
@@ -91,10 +89,14 @@ class EmailService:
         <div style="font-family:sans-serif;padding:20px;">
             <h2>Hola {usuario.nombre}</h2>
             <p>Haz clic para verificar tu cuenta:</p>
-            <a href="{verification_url}" 
-               style="background:#3b82f6;color:white;padding:10px 20px;border-radius:5px;text-decoration:none;">
-               Verificar
-            </a>
+
+            <div style="margin:20px 0;">
+                <a href="{verification_url}" 
+                   style="background:#3b82f6;color:white;padding:12px 20px;border-radius:5px;text-decoration:none;">
+                   Verificar cuenta
+                </a>
+            </div>
+
             <p>O copia este enlace:</p>
             <p>{verification_url}</p>
         </div>
@@ -107,6 +109,7 @@ class EmailService:
             f"Verifica tu cuenta: {verification_url}"
         )
 
+    # 🎉 BIENVENIDA
     def enviar_bienvenida(self, usuario):
         app_url = self._get_app_url()
         login_url = f"{app_url}/seguridad/login/"
@@ -114,7 +117,7 @@ class EmailService:
         subject = "Bienvenido al sistema"
 
         html_content = f"""
-        <div>
+        <div style="text-align:center;padding:20px;">
             <h1>🎉 Cuenta activada</h1>
             <p>Hola {usuario.nombre}</p>
             <a href="{login_url}">Ir al login</a>
@@ -123,6 +126,7 @@ class EmailService:
 
         return self.enviar_email(usuario.correo, subject, html_content)
 
+    # 🔑 RECUPERACIÓN DE CONTRASEÑA
     def enviar_recuperacion_password(self, usuario):
         token = usuario.generar_token_recuperacion()
 
@@ -132,15 +136,21 @@ class EmailService:
         subject = "Recuperar contraseña"
 
         html_content = f"""
-        <div>
+        <div style="padding:20px;">
             <h3>Recuperación de contraseña</h3>
             <p>Hola {usuario.nombre}</p>
-            <a href="{reset_url}">Restablecer contraseña</a>
+
+            <div style="margin:20px 0;">
+                <a href="{reset_url}" 
+                   style="background:#f59e0b;color:white;padding:10px 20px;border-radius:5px;text-decoration:none;">
+                   Restablecer contraseña
+                </a>
+            </div>
         </div>
         """
 
         return self.enviar_email(usuario.correo, subject, html_content)
 
 
-# Instancia global
+# 🔥 INSTANCIA GLOBAL
 email_service = EmailService()
