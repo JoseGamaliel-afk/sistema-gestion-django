@@ -20,12 +20,23 @@ class LoginView(View):
     template_name = 'seguridad/login.html'
 
     def get(self, request):
-        # Si ya está autenticado, redirigir al dashboard
+        # Si ya está autenticado, verificar su estado real
         token = request.session.get('jwt_token')
         if token:
             from .services import JWTService
-            if JWTService.verificar_token(token):
+            usuario = JWTService.obtener_usuario_desde_token(token)
+            
+            # Si el usuario existe y está ACTIVO, entra al dashboard
+            if usuario and getattr(usuario, 'activo', False):
                 return redirect('seguridad:dashboard')
+            else:
+                # ¡AQUÍ MATAMOS EL BUCLE!
+                # Si está inactivo, borramos la sesión y la cookie para romper el bucle infinito
+                request.session.flush()
+                if 'jwt_token' in request.COOKIES:
+                    response = render(request, self.template_name, {'form': LoginForm()})
+                    response.delete_cookie('jwt_token')
+                    return response
         
         form = LoginForm()
         return render(request, self.template_name, {'form': form})
