@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.conf import settings
 from django.utils import timezone
-
+from apps.seguridad.email_service import email_service
 
 from .models import Usuario, Perfil, Modulo, PermisosPerfil
 from .forms import LoginForm, UsuarioForm, PerfilForm, ModuloForm, MiPerfilForm
@@ -635,8 +635,6 @@ class UsuarioDetailView(View):
         })
 
 
-from django.contrib import messages
-
 class MiPerfilView(View):
     """Vista del perfil del usuario actual"""
     template_name = 'seguridad/mi_perfil.html'
@@ -653,33 +651,11 @@ class MiPerfilView(View):
         return render(request, self.template_name, context)
 
     def post(self, request):
-        usuario = request.usuario_actual
-        form = MiPerfilForm(request.POST, request.FILES, instance=usuario)
-
-        # 🔥 VALIDACIÓN EXTRA DE IMAGEN (SEGURIDAD)
-        avatar = request.FILES.get('avatar')
-
-        if avatar:
-            # Validar tipo
-            if not avatar.content_type.startswith('image/'):
-                messages.error(request, 'Solo se permiten archivos de tipo imagen')
-                return self.render_with_context(request, form)
-
-            # Validar tamaño (2MB)
-            if avatar.size > 2 * 1024 * 1024:
-                messages.error(request, 'La imagen no debe superar los 2MB')
-                return self.render_with_context(request, form)
-
+        form = MiPerfilForm(request.POST, request.FILES, instance=request.usuario_actual)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Perfil actualizado correctamente')
             return redirect('seguridad:mi_perfil')
-
-        messages.error(request, 'Corrige los errores del formulario')
-        return self.render_with_context(request, form)
-
-    def render_with_context(self, request, form):
-        """Helper para evitar repetir código"""
+        
         context = {
             'form': form,
             'usuario': request.usuario_actual,
@@ -688,6 +664,7 @@ class MiPerfilView(View):
             ]
         }
         return render(request, self.template_name, context)
+    
 
     
 
@@ -783,21 +760,33 @@ class RecuperarPasswordView(View):
 
     def post(self, request):
         correo = request.POST.get('correo', '').strip()
-
         try:
             usuario = Usuario.objects.get(correo=correo, activo=True)
-
-            # ✅ USAR EL MÉTODO CORRECTO
-            email_service.enviar_recuperacion_password(usuario)
-
+            # Aquí es donde se dispara el servicio
+            email_service.enviar_email(
+                usuario.correo, 
+                "Recuperar Contraseña", 
+                f"Usa este link: {usuario.generar_token_recuperacion()}"
+            )
         except Usuario.DoesNotExist:
-            pass  # No revelar si el correo existe
-
+            pass # Por seguridad no avisamos si el correo existe o no
+            
         return render(request, self.template_name, {
-            'success': True,
+            'success': True, 
             'message': 'Si el correo está registrado, recibirás instrucciones pronto.'
         })
 
+@method_decorator(csrf_exempt, name='dispatch')
+class ReenviarVerificacionAPIView(View):
+    def post(self, request, pk):
+        usuario = get_object_or_404(Usuario, pk=pk)
+        if usuario.email_verificado:
+            return JsonResponse({'success': False, 'error': 'Ya verificado'}, status=400)
+        
+        result = email_service.enviar_verificacion_email(usuario)
+        if result.get('success'):
+            return JsonResponse({'success': True, 'message': 'Correo enviado'})
+        return JsonResponse({'success': False, 'error': 'Error de proveedor'}, status=500)
 
 
 class RestablecerPasswordView(View):
@@ -873,42 +862,44 @@ class ReenviarVerificacionAPIView(View):
     """API para reenviar verificación desde el panel de admin"""
     
     def post(self, request, pk):
-        # Obtener usuario (esto ya lanza 404 automáticamente)
-        usuario = get_object_or_404(Usuario, pk=pk)
-
-        # Validar si ya está verificado
-        if usuario.email_verificado:
-            return JsonResponse({
-                'success': False,
-                'error': 'El usuario ya tiene su email verificado'
-            }, status=400)
-
         try:
-            # Ya lo tienes importado arriba, no necesitas re-importar
+            usuario = get_object_or_404(Usuario, pk=pk)
+            
+            if usuario.email_verificado:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'El usuario ya tiene su email verificado'
+                }, status=400)
+            
+            # Importar aquí para evitar imports circulares
+            from .email_service import email_service
+            
             result = email_service.enviar_verificacion_email(usuario)
-
+            
             if result.get('success'):
                 return JsonResponse({
                     'success': True,
-                    'message': f'Correo de verificación enviado a {usuario.correo}'
+                    'message': 'Correo de verificación enviado'
                 })
-
-            return JsonResponse({
-                'success': False,
-                'error': result.get('error', 'Error al enviar el correo')
-            }, status=500)
-
-        except Exception as e:
-            # Log más limpio
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.exception("Error al reenviar verificación")
-
-            return JsonResponse({
-                'success': False,
-                'error': 'Error interno del servidor'
-            }, status=500)
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'error': result.get('error', 'Error al enviar el correo')
+                }, status=500)
                 
+        except Usuario.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'Usuario no encontrado'
+            }, status=404)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()  # Esto mostrará el error completo en consola
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+        
 class PerfilDetailView(View):
     def get(self, request, pk):
         perfil = get_object_or_404(Perfil, pk=pk)

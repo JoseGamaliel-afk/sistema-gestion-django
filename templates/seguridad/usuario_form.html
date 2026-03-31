@@ -5,7 +5,6 @@
 
 {% block content %}
 <div class="max-w-3xl mx-auto">
-
     <!-- Header -->
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-800 dark:text-white">{{ titulo }}</h1>
@@ -35,56 +34,61 @@
 
         <!-- Datos Personales -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
                 <i class="fas fa-user mr-2 text-primary-500"></i>
                 Datos Personales
             </h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Nombre -->
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium mb-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                         Nombre completo <span class="text-red-500">*</span>
                     </label>
                     {{ form.nombre }}
                 </div>
 
+                <!-- Correo -->
                 <div>
-                    <label class="block text-sm font-medium mb-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                         Correo electrónico <span class="text-red-500">*</span>
                     </label>
                     {{ form.correo }}
                 </div>
 
+                <!-- Celular -->
                 <div>
-                    <label class="block text-sm font-medium mb-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                         Celular
                     </label>
                     {{ form.celular }}
-                    <p class="mt-1 text-xs text-gray-500">10 dígitos numéricos</p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">10 dígitos numéricos</p>
                 </div>
             </div>
         </div>
 
         <!-- Seguridad -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold mb-4">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
                 <i class="fas fa-lock mr-2 text-primary-500"></i>
                 Seguridad
             </h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Contraseña -->
                 <div>
-                    <label class="block text-sm font-medium mb-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                         Contraseña {% if not usuario_edit %}<span class="text-red-500">*</span>{% endif %}
                     </label>
                     {{ form.password }}
                     {% if usuario_edit %}
-                    <p class="text-xs text-gray-500 mt-1">Dejar vacío para mantener la actual</p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Dejar vacío para mantener la actual</p>
                     {% endif %}
                 </div>
 
+                <!-- Confirmar Contraseña -->
                 <div>
-                    <label class="block text-sm font-medium mb-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                         Confirmar contraseña {% if not usuario_edit %}<span class="text-red-500">*</span>{% endif %}
                     </label>
                     {{ form.confirmar_password }}
@@ -92,24 +96,26 @@
             </div>
         </div>
 
-        <!-- Rol -->
+        <!-- Rol y Estado -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold mb-4">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
                 <i class="fas fa-id-badge mr-2 text-primary-500"></i>
-                Rol
+                Rol y Estado
             </h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Perfil -->
                 <div>
-                    <label class="block text-sm font-medium mb-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                         Perfil <span class="text-red-500">*</span>
                     </label>
                     {{ form.perfil }}
                 </div>
 
+                <!-- Activo -->
                 <div class="flex items-center pt-8">
                     {{ form.activo }}
-                    <label class="ml-2 text-sm">
+                    <label class="ml-2 text-sm text-gray-700 dark:text-gray-200">
                         Usuario activo
                     </label>
                 </div>
@@ -118,58 +124,194 @@
 
         <!-- Imagen -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold mb-4">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
                 <i class="fas fa-image mr-2 text-primary-500"></i>
                 Imagen de Perfil
             </h2>
             
             <div class="flex items-center space-x-6">
-                <img id="avatar-preview"
-                     src="{% if usuario_edit and usuario_edit.avatar %}{{ usuario_edit.avatar_url }}{% else %}https://ui-avatars.com/api/?name=Usuario&background=3b82f6&color=fff{% endif %}"
-                     class="w-24 h-24 rounded-full object-cover border-4 border-gray-200">
-
-                <input type="file" name="avatar" id="avatar-input" accept="image/*"
-                       class="w-full px-4 py-2 border rounded-lg">
+                <!-- Preview -->
+                <div class="flex-shrink-0">
+                    <img id="avatar-preview" 
+                         src="{% if usuario_edit and usuario_edit.avatar %}{{ usuario_edit.avatar_url }}{% else %}https://ui-avatars.com/api/?name=Usuario&background=3b82f6&color=fff{% endif %}" 
+                         alt="Avatar" 
+                         class="w-24 h-24 rounded-full object-cover border-4 border-gray-200 dark:border-gray-600">
+                </div>
+                
+                <!-- Upload -->
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                        Subir imagen
+                    </label>
+                    <input type="file" 
+                           name="avatar" 
+                           id="avatar-input"
+                           accept="image/*"
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG hasta 5MB</p>
+                </div>
             </div>
         </div>
 
+        <!-- Notificación por Email (solo para nuevos usuarios) -->
+        {% if not usuario_edit %}
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-envelope mr-2 text-primary-500"></i>
+                Notificación
+            </h2>
+            
+            <div class="flex items-center">
+                {{ form.enviar_verificacion }}
+                <label class="ml-3 text-sm text-gray-700 dark:text-gray-200">
+                    <span class="font-medium">Enviar correo de verificación</span>
+                    <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">
+                        Se enviará un email al usuario para que verifique su correo y active su cuenta
+                    </p>
+                </label>
+            </div>
+            
+            <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                <div class="flex">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-3"></i>
+                    <div class="text-sm text-blue-700 dark:text-blue-300">
+                        <p class="font-medium">¿Qué sucede cuando se envía el correo?</p>
+                        <ul class="mt-2 list-disc list-inside space-y-1 text-blue-600 dark:text-blue-400">
+                            <li>El usuario recibirá un enlace de verificación</li>
+                            <li>No podrá iniciar sesión hasta verificar su correo</li>
+                            <li>El enlace expira en 24 horas</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Estado de verificación (solo para usuarios existentes) -->
+        {% if usuario_edit %}
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-shield-alt mr-2 text-primary-500"></i>
+                Estado de Verificación
+            </h2>
+            
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    {% if usuario_edit.email_verificado %}
+                    <div class="w-10 h-10 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-check text-green-500"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">Email verificado</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">El usuario puede iniciar sesión</p>
+                    </div>
+                    {% else %}
+                    <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/50 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-clock text-yellow-500"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">Pendiente de verificación</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">El usuario no ha verificado su correo</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if not usuario_edit.email_verificado %}
+                <button type="button" 
+                        onclick="reenviarVerificacion({{ usuario_edit.id }})"
+                        class="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors text-sm">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Reenviar verificación
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Actions -->
-        <div class="flex justify-end space-x-3">
+        <div class="flex items-center justify-end space-x-3">
             <a href="{% url 'seguridad:usuario_list' %}" 
-               class="px-6 py-2 bg-gray-200 rounded-lg">
+               class="px-6 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                 Cancelar
             </a>
-
             <button type="submit" 
-                    class="px-6 py-2 bg-primary-600 text-white rounded-lg">
+                    class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+                <i class="fas fa-save mr-2"></i>
                 Guardar
             </button>
         </div>
     </form>
 </div>
 
-<!-- Toast -->
-<div id="toast" class="fixed bottom-4 right-4 hidden">
+<!-- Toast para notificaciones -->
+<div id="toast" class="fixed bottom-4 right-4 transform translate-y-full opacity-0 transition-all duration-300 z-50 hidden">
     <div id="toast-content" class="px-6 py-3 rounded-lg shadow-lg flex items-center">
+        <i id="toast-icon" class="mr-2"></i>
         <span id="toast-message"></span>
     </div>
 </div>
 
 <script>
-// Preview imagen
-const input = document.getElementById('avatar-input');
-if (input) {
-    input.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('avatar-preview').src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+// Preview de imagen
+document.getElementById('avatar-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('avatar-preview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Reenviar verificación
+async function reenviarVerificacion(usuarioId) {
+    try {
+        const response = await fetch(`/seguridad/api/reenviar-verificacion/${usuarioId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('Correo de verificación enviado', 'success');
+        } else {
+            showToast(data.error || 'Error al enviar', 'error');
         }
-    });
+    } catch (error) {
+        showToast('Error de conexión', 'error');
+    }
+}
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const content = document.getElementById('toast-content');
+    const icon = document.getElementById('toast-icon');
+    const msg = document.getElementById('toast-message');
+    
+    msg.textContent = message;
+    
+    if (type === 'success') {
+        content.className = 'bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center';
+        icon.className = 'fas fa-check-circle mr-2';
+    } else {
+        content.className = 'bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center';
+        icon.className = 'fas fa-exclamation-circle mr-2';
+    }
+    
+    toast.classList.remove('hidden');
+    setTimeout(() => {
+        toast.classList.remove('translate-y-full', 'opacity-0');
+    }, 10);
+    
+    setTimeout(() => {
+        toast.classList.add('translate-y-full', 'opacity-0');
+        setTimeout(() => toast.classList.add('hidden'), 300);
+    }, 3000);
 }
 </script>
-
 {% endblock %}
