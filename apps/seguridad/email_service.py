@@ -70,7 +70,12 @@ class EmailService:
             return {'success': False, 'error': str(e)}
 
     def enviar_verificacion_email(self, usuario):
-        token = usuario.generar_token_verificacion()
+    # 🔥 Asegurar que siempre haya token válido
+        if not usuario.token_verificacion:
+            usuario.generar_token_verificacion()
+            usuario.save()
+
+        token = usuario.token_verificacion
         app_url = getattr(settings, 'APP_URL', 'http://localhost:8000').rstrip('/')
         verification_url = f"{app_url}/seguridad/verificar-email/{token}/"
         expiry = getattr(settings, 'EMAIL_VERIFICATION_EXPIRY_HOURS', 24)

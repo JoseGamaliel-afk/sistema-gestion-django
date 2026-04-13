@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.conf import settings
 from django.utils import timezone
-from apps.seguridad.email_service import email_service
+
 
 from .models import Usuario, Perfil, Modulo, PermisosPerfil
 from .forms import LoginForm, UsuarioForm, PerfilForm, ModuloForm, MiPerfilForm
@@ -569,8 +569,12 @@ class UsuarioCreateView(View):
             enviar_correo = form.cleaned_data.get('enviar_verificacion', False)
             
             if enviar_correo:
-                # Si marcó la casilla, enviamos el correo de verificación
+                if not usuario.token_verificacion:
+                     usuario.generar_token_verificacion()
+                     usuario.save()
+
                 email_service.enviar_verificacion_email(usuario)
+            
             else:
                 # Si NO marcó la casilla, lo auto-verificamos para que no requiera el correo
                 usuario.email_verificado = True
@@ -757,6 +761,10 @@ class ReenviarVerificacionView(View):
                     'error': 'Este correo ya está verificado'
                 })
 
+            # Aquí sí generamos uno nuevo (porque es reenvío)
+            usuario.generar_token_verificacion()
+            usuario.save()
+
             result = email_service.enviar_verificacion_email(usuario)
 
             if result['success']:
@@ -797,17 +805,6 @@ class RecuperarPasswordView(View):
             'message': 'Si el correo está registrado, recibirás instrucciones pronto.'
         })
 
-@method_decorator(csrf_exempt, name='dispatch')
-class ReenviarVerificacionAPIView(View):
-    def post(self, request, pk):
-        usuario = get_object_or_404(Usuario, pk=pk)
-        if usuario.email_verificado:
-            return JsonResponse({'success': False, 'error': 'Ya verificado'}, status=400)
-        
-        result = email_service.enviar_verificacion_email(usuario)
-        if result.get('success'):
-            return JsonResponse({'success': True, 'message': 'Correo enviado'})
-        return JsonResponse({'success': False, 'error': 'Error de proveedor'}, status=500)
 
 
 class RestablecerPasswordView(View):
@@ -895,6 +892,9 @@ class ReenviarVerificacionAPIView(View):
             # Importar aquí para evitar imports circulares
             from .email_service import email_service
             
+            usuario.generar_token_verificacion()
+            usuario.save()
+
             result = email_service.enviar_verificacion_email(usuario)
             
             if result.get('success'):

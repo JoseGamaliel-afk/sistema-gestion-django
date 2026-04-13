@@ -106,33 +106,21 @@ class UsuarioForm(forms.ModelForm):
     def save(self, commit=True):
         usuario = super().save(commit=False)
         password = self.cleaned_data.get('password')
-        enviar_verificacion = self.cleaned_data.get('enviar_verificacion', True)
-        
-        # Establecer contraseña si se proporcionó
+    
+    # Establecer contraseña si se proporcionó
         if password:
             usuario.set_password(password)
-        
-        # Si es nuevo usuario
+    
+    # Si es nuevo usuario
         es_nuevo = not self.instance.pk
-        
+    
         if es_nuevo:
-            # Marcar email como no verificado
+        # Marcar email como no verificado
             usuario.email_verificado = False
-        
+    
         if commit:
             usuario.save()
-            
-            # Enviar email de verificación si es nuevo y está marcada la opción
-            if es_nuevo and enviar_verificacion:
-                from .email_service import email_service
-                try:
-                    email_service.enviar_verificacion_email(usuario)
-                except Exception as e:
-                    # Log del error pero no bloquear el guardado
-                    import logging
-                    logger = logging.getLogger(__name__)
-                    logger.error(f"Error enviando email de verificación: {e}")
-        
+    
         return usuario
 
 
